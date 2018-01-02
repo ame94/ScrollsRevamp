@@ -18,7 +18,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import scrolls.ScrollsPlugin;
-import scrolls.configuration.ScrollDataType;
+import scrolls.configuration.ScrollsConfig;
 import scrolls.event.scroll.BasicScrollUseEvent;
 import scrolls.event.scroll.ChaosScrollUseEvent;
 import scrolls.event.scroll.CleanSlateScrollUseEvent;
@@ -33,8 +33,10 @@ import scrolls.inventory.ScrollType;
 public class InventoryListener implements Listener {
 
     private ScrollsPlugin plugin;
-
-    public InventoryListener(ScrollsPlugin plugin) {
+    private ScrollsConfig config;
+    
+    public InventoryListener(ScrollsPlugin plugin, ScrollsConfig config) {
+        this.config = config;
         this.plugin = plugin;
     }
 
@@ -46,15 +48,15 @@ public class InventoryListener implements Listener {
     private boolean useScrollSlot(ItemMeta appMeta) {
         if (!appMeta.hasLore()) {
             List<String> appLore = new ArrayList<String>();
-            appLore.add(String.format("Scroll Slots: [%2s/%2s]", plugin.getScrollConfig().getScrollSlots()-1, plugin.getScrollConfig().getScrollSlots()));
+            appLore.add(String.format("Scroll Slots: [%2s/%2s]", config.getScrollSlots()-1, config.getScrollSlots()));
             appMeta.setLore(appLore);
         } else {
-            if (appMeta.getLore().contains(String.format("Scroll Slots: [ 0/%2s]", plugin.getScrollConfig().getScrollSlots()))) {
+            if (appMeta.getLore().contains(String.format("Scroll Slots: [ 0/%2s]", config.getScrollSlots()))) {
                 return false;
             }
             List<String> appLore = appMeta.getLore();
             int slots = Integer.parseInt(appMeta.getLore().get(0).substring(15, 17).replace(" ", "")) - 1;
-            appLore.set(0, String.format("Scroll Slots: [%2s/%2s]", slots, plugin.getScrollConfig().getScrollSlots()));
+            appLore.set(0, String.format("Scroll Slots: [%2s/%2s]", slots, config.getScrollSlots()));
             appMeta.setLore(appLore);
         }
         return true;
@@ -87,7 +89,7 @@ public class InventoryListener implements Listener {
                 plugin.getServer().getPluginManager().callEvent(useEvent);
                 break;
             }
-            case BASIC_ENCH: {
+            case BASIC: {
                 if (!useScrollSlot(appMeta)) {
                     return;
                 }
@@ -96,7 +98,7 @@ public class InventoryListener implements Listener {
                 plugin.getServer().getPluginManager().callEvent(useEvent);
                 break;
             }
-            case DARK_ENCH: {
+            case DARK: {
                 if (!useScrollSlot(appMeta)) {
                     return;
                 }
@@ -105,12 +107,12 @@ public class InventoryListener implements Listener {
                 plugin.getServer().getPluginManager().callEvent(useEvent);
                 break;
             }
-            case CHAOS: {
+            case CHAOTIC: {
                 if (!useScrollSlot(appMeta)) {
                     return;
                 }
                 appItem.setItemMeta(appMeta);
-                ScrollUseEvent useEvent = new ChaosScrollUseEvent(scroll, appItem, event.getRawSlot(), player);
+                ScrollUseEvent useEvent = new ChaosScrollUseEvent(scroll, appItem, event.getRawSlot(), player, config.getEnchantmentPriority(), config.getRareness_enchantments(), config.getRareness_enchlevel());
                 plugin.getServer().getPluginManager().callEvent(useEvent);
                 break;
             }

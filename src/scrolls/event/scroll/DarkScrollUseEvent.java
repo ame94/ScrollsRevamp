@@ -20,9 +20,11 @@ public class DarkScrollUseEvent extends ScrollUseEvent{
     public DarkScrollUseEvent(ItemStack scroll, ItemStack appItem,int slot, Player player) {
         super(scroll, appItem,slot, player);
     }
-    
+    @Override
     public void apply(){
-        
+        scroll.getEnchantments().keySet().forEach((ench) -> {
+            appItem.addUnsafeEnchantment(ench, scroll.getEnchantments().get(ench));
+        });
     }
     @Override
     public HandlerList getHandlers() {

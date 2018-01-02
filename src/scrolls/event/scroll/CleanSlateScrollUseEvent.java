@@ -6,9 +6,12 @@
 
 package scrolls.event.scroll;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 
 /**
  *
@@ -23,8 +26,16 @@ public class CleanSlateScrollUseEvent extends ScrollUseEvent{
         
         
     }
+    @Override
     public void apply(){
         
+        ItemMeta appMeta = appItem.getItemMeta();
+        String string = appMeta.getLore().get(0);
+        int slots = Integer.parseInt(string.substring(15, 17).replaceAll(" ", ""));
+        
+        appMeta.getLore().set(0, String.format(string.replaceFirst(string.substring(15, 17), "%2s"),slots++));
+        appItem.setItemMeta(appMeta);
+               
     }
     public HandlerList getHandlers() {
         return HANDLERS;

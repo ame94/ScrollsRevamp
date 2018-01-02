@@ -98,7 +98,7 @@ public class SpawnConfig extends Config {
         return cleanslatescroll;
     }
 
-    public boolean canDrop(EntityType type) {
+    public boolean isDropper(EntityType type) {
         return scrollDroppers.contains(type);
     }
 

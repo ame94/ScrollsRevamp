@@ -32,24 +32,20 @@ public class ScrollsCommand implements CommandExecutor {
     private final ScrollsPlugin plugin;
     private final ScrollMath scrollMath;
 
-    public ScrollsCommand(ScrollsPlugin plugin, ScrollMath math) {
+    public ScrollsCommand(ScrollsPlugin plugin) {
         this.plugin = plugin;
-        this.scrollMath = math;
+        this.scrollMath = plugin.getScrollMath();
     }
 
-    private void correctUse(Player player, String rest) {
-        player.sendMessage(ChatColor.WHITE + "CorrectUsage \n" + ChatColor.RED + "'/scrolls " + rest + "'");
-    }
-
-    private void permissionCheck(Player player) {
-        player.sendMessage(ChatColor.RED + "You don't have permission for that command!");
+    private void correctUse(CommandSender player, String rest) {
+        player.sendMessage(ChatColor.WHITE + "Correct usage for that command is... \n" + ChatColor.RED + "'/scrolls " + rest + "'");
     }
 
     private void permissionCheck(CommandSender cs) {
         cs.sendMessage(ChatColor.RED + "You don't have permission for that command!");
     }
 
-    private void sendHelp(Player player) {
+    private void sendHelp(CommandSender player) {
         String message = "--------------------------------------------------\n"
                 + ChatColor.GOLD + "                 SCROLLS HELPS 1\n" + ChatColor.WHITE;
         int count = 0;
@@ -59,121 +55,93 @@ public class ScrollsCommand implements CommandExecutor {
         }
         if (player.hasPermission("scrolls.command.get.more")) {
             count++;
-            message += (count + "" + ChatColor.GRAY + ". /scrolls get <type> <amount>" + ChatColor.WHITE + "- will get you many scrolls of the same type\n");
+            message += (count + "" + ChatColor.GRAY + ". /scrolls get <type> <amount>" + ChatColor.WHITE + " - will get you many scrolls of the same type\n");
         }
         if (player.hasPermission("scrolls.command.help")) {
             count++;
-            message += (count + "" + ChatColor.GRAY + ". /scrolls help" + ChatColor.WHITE + "- will show you this message.\n");
+            message += (count + "" + ChatColor.GRAY + ". /scrolls help" + ChatColor.WHITE + " - will show you this message.\n");
         }
         if (player.hasPermission("scrolls.command.reload")) {
             count++;
-            message += (count + "" + ChatColor.GRAY + ". /scrolls reload" + ChatColor.WHITE + "- will reload the plugins config file.\n");
+            message += (count + "" + ChatColor.GRAY + ". /scrolls reload" + ChatColor.WHITE + " - will reload the plugins config file.\n");
         }
         if (player.hasPermission("scrolls.command.data.toggle")) {
             count++;
-            message += (count + "" + ChatColor.GRAY + ". /scrolls data <true/false>" + ChatColor.WHITE + "- will reload the plugins config file.\n");
+            message += (count + "" + ChatColor.GRAY + ". /scrolls data" + ChatColor.WHITE + " - will toggle whether scrolls creation data should be recorded.\n");
         }
-        if (player.hasPermission("scrolls.command.data.view")) {
+        if (player.hasPermission("scrolls.command.data.save")) {
             count++;
-            message += (count + "" + ChatColor.GRAY + ". /scrolls data view" + ChatColor.WHITE + "- will reload the plugins config file.\n");
+            message += (count + "" + ChatColor.GRAY + ". /scrolls data save" + ChatColor.WHITE + " - will save what data has been recorded if any.\n");
         }
         player.sendMessage(message + "--------------------------------------------------\n");
     }
 
     @Override
     public boolean onCommand(CommandSender cs, Command cmd, String string, String[] arg) {
-        Player player = (Player) cs;
+        Player player;
         if (arg.length == 0) {
-            sendHelp(player);
+            sendHelp(cs);
             return true;
         }
         switch (arg[0].toLowerCase()) {
             default: {
-                sendHelp(player);
+                sendHelp(cs);
                 return true;
             }
             case "help": {
-                sendHelp(player);
+                sendHelp(cs);
                 return true;
             }
             case "data": {
+                if(!cs.hasPermission("scrolls.command.data")){
+                    permissionCheck(cs);
+                    return true;
+                }
                 if (arg.length > 1) {
-                    if (arg[1].equalsIgnoreCase("save")) {
-                        try {
-                            File save = new File(plugin.getDataFolder() + "/test");
-                            save.mkdir();
-                            save = new File(plugin.getDataFolder() + "/test/" + System.nanoTime()+".txt");
-                            FileWriter fw = new FileWriter(save);
-                            for (ScrollType scrollType : ScrollType.values()) {
-                                fw.write(scrollType.toString().toLowerCase() + " : \n");
-                                for (DataTrackType trackType : DataTrackType.values()) {
-                                    String loc = scrollType.toString().toLowerCase() + "." + trackType.toString().toLowerCase();
-                                    if (plugin.getScrollListener().getData().containsKey(loc)) {
-                                        fw.write("     " + trackType.toString().toLowerCase() + " : \n");
-                                        switch (trackType) {
-                                            case ENCHANTMENT: {
-                                                Map<Enchantment, Integer> data = (HashMap<Enchantment, Integer>) plugin.getScrollListener().getData().get(loc);
-                                                for (Enchantment ench : plugin.getScrollConfig().getEnchantmentPriority()) {
-                                                    if(data.containsKey(ench)){
-                                                        String s = "      %25s : %5s\n";
-                                                        s= String.format(s, ench.getName(), data.get(ench));
-                                                        System.out.println(s);
-                                                        fw.write(s);
-                                                    }
-                                                }
-                                                break;
-                                            }
-                                            case SUCCESS_RATE: {
-                                                Map<Double, Integer> ratesMade = (Map<Double, Integer>) plugin.getScrollListener().getData().get(loc);
-                                                for (double d : ratesMade.keySet()) {
-                                                        String s = "      %5s : %5s\n";
-                                                        fw.write(String.format(s, d, ratesMade.get(d)));
-                                                }
-                                                break;
-                                            }
-                                            case DESTROY_RATE: {
-                                                Map<Double, Integer> ratesMade = (Map<Double, Integer>) plugin.getScrollListener().getData().get(loc);
-                                                for (double d : ratesMade.keySet()) {
-                                                        String s = "      %5s : %5s\n";
-                                                        fw.write(String.format(s, d, ratesMade.get(d)));
-                                                }
-                                                break;
-                                            }
-                                            case TOTAL_MADE: {
-                                                
-                                                int made = (int) plugin.getScrollListener().getData().get(loc);
-                                                String s = "    %5s\n";
-                                                fw.write(String.format(s, made));
-                                                break;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            fw.close();
-                            return true;
-                        } catch (Exception e) {
+                    if (!arg[1].equalsIgnoreCase("save")) {
+                        
+                        String message = "Scroll data command usage : \n";
+                        if (cs.hasPermission("scrolls.command.data.toggle")) {
+                            message += (1 + "" + ChatColor.GRAY + ". /scrolls data" + ChatColor.WHITE + " - will toggle whether scrolls creation data should be recorded.\n");
+                        }
+                        if (cs.hasPermission("scrolls.command.data.save")) {
+                            message += (2 + "" + ChatColor.GRAY + ". /scrolls data save" + ChatColor.WHITE + " - will save what data has been recorded if any.\n");
+                        }
+                        cs.sendMessage(message);
+                        return true;
+                        
+                    }else{
+                        try{
+                            
+                            plugin.saveDataFile();
+                        }catch (Exception e) {
                             e.printStackTrace();
                             cs.sendMessage("There was an error creating the data file!");
                             return true;
                         }
+                        cs.sendMessage("Successfully saved the data file, check for the most recently edited in the data folder. Tracking is presumabley no longer needed.");
                     }
                 }
-                plugin.getScrollListener().toggleTracking(DataTrackType.SUCCESS_RATE);
-                plugin.getScrollListener().toggleTracking(DataTrackType.DESTROY_RATE);
-                plugin.getScrollListener().toggleTracking(DataTrackType.ENCHANTMENT);
-                plugin.getScrollListener().toggleTracking(DataTrackType.TOTAL_MADE);
-                cs.sendMessage("Toggled scroll tracking for " + DataTrackType.SUCCESS_RATE.toString() + ", " + DataTrackType.DESTROY_RATE.toString() + ", " + DataTrackType.ENCHANTMENT.toString() + ", " + DataTrackType.TOTAL_MADE.toString() + "\n"
-                        );
+                plugin.toggleTracking();
+                String message = "Scroll tracking is now %8s";
+                if(plugin.isTrackingScrollData())
+                    cs.sendMessage(String.format(message, "enabled"));
+                else
+                    cs.sendMessage(String.format(message, "disabled"));
                 return true;
             }
             case "get": {
-                if (!player.hasPermission("scrolls.command.get")) {
-                    permissionCheck(player);
+                if (!cs.hasPermission("scrolls.command.get")) {
+                    permissionCheck(cs);
                     return true;
                 }
+                if(!(cs instanceof Player)){
+                    cs.sendMessage("That command is for players to use only! Sorry for the inconvinience.");
+                    return true;
+                }
+                player = (Player) cs;
                 if (arg.length < 2) {
-                    if (player.hasPermission("scrolls.command.get.more")) {
+                    if (cs.hasPermission("scrolls.command.get.more")) {
                         correctUse(player, "get <type> <amount>");
                         player.sendMessage(ChatColor.GRAY + "Types of scrolls include: darkscroll , basicscroll,chaosscroll, and cleanslatescroll");
                         return true;
@@ -219,7 +187,7 @@ public class ScrollsCommand implements CommandExecutor {
                                 correctUse(player, "get <type> <amount>");
                                 return true;
                             } catch (ArrayIndexOutOfBoundsException e) {
-                                ItemStack s = scrollMath.createRandomScroll(ScrollType.DARK_ENCH);
+                                ItemStack s = scrollMath.createRandomScroll(ScrollType.DARK);
                                 player.getInventory().addItem(s);
                                 player.updateInventory();
                                 ScrollSpawnedEvent spawnedEvent = new ScrollSpawnedEvent(s, false);
@@ -228,7 +196,7 @@ public class ScrollsCommand implements CommandExecutor {
                             }
                         }
                         while (i > 0) {
-                            ItemStack s = scrollMath.createRandomScroll(ScrollType.DARK_ENCH);
+                            ItemStack s = scrollMath.createRandomScroll(ScrollType.DARK);
                             player.getInventory().addItem(s);
                             player.updateInventory();
                             ScrollSpawnedEvent spawnedEvent = new ScrollSpawnedEvent(s, false);
@@ -246,7 +214,7 @@ public class ScrollsCommand implements CommandExecutor {
                                 correctUse(player, "get <type> <amount>");
                                 return true;
                             } catch (ArrayIndexOutOfBoundsException e) {
-                                ItemStack s = scrollMath.createRandomScroll(ScrollType.BASIC_ENCH);
+                                ItemStack s = scrollMath.createRandomScroll(ScrollType.BASIC);
                                 player.getInventory().addItem(s);
                                 player.updateInventory();
                                 ScrollSpawnedEvent spawnedEvent = new ScrollSpawnedEvent(s, false);
@@ -255,7 +223,7 @@ public class ScrollsCommand implements CommandExecutor {
                             }
                         }
                         while (i > 0) {
-                            ItemStack s = scrollMath.createRandomScroll(ScrollType.BASIC_ENCH);
+                            ItemStack s = scrollMath.createRandomScroll(ScrollType.BASIC);
                             player.getInventory().addItem(s);
                             player.updateInventory();
                             ScrollSpawnedEvent spawnedEvent = new ScrollSpawnedEvent(s, false);
@@ -273,7 +241,7 @@ public class ScrollsCommand implements CommandExecutor {
                                 correctUse(player, "get <type> <amount>");
                                 return true;
                             } catch (ArrayIndexOutOfBoundsException e) {
-                                ItemStack s = scrollMath.createRandomScroll(ScrollType.CHAOS);
+                                ItemStack s = scrollMath.createRandomScroll(ScrollType.CHAOTIC);
                                 player.getInventory().addItem(s);
                                 player.updateInventory();
                                 ScrollSpawnedEvent spawnedEvent = new ScrollSpawnedEvent(s, false);
@@ -282,7 +250,7 @@ public class ScrollsCommand implements CommandExecutor {
                             }
                         }
                         while (i > 0) {
-                            ItemStack s = scrollMath.createRandomScroll(ScrollType.CHAOS);
+                            ItemStack s = scrollMath.createRandomScroll(ScrollType.CHAOTIC);
                             player.getInventory().addItem(s);
                             player.updateInventory();
                             ScrollSpawnedEvent spawnedEvent = new ScrollSpawnedEvent(s, false);
@@ -304,15 +272,15 @@ public class ScrollsCommand implements CommandExecutor {
                 }
             }
             case "reload": {
-                if (!player.hasPermission("scrolls.command.reload")) {
-                    permissionCheck(player);
+                if (!cs.hasPermission("scrolls.command.reload")) {
+                    permissionCheck(cs);
                     return true;
                 }
                 plugin.reload();
-                player.sendMessage("Success!");
+                cs.sendMessage("Success!");
+                return true;
             }
         }
-        return false;
     }
 
 }

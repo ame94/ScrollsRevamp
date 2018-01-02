@@ -11,5 +11,5 @@ package scrolls.inventory;
  * @author knaxel
  */
 public enum ScrollType {
-    BASIC_ENCH,DARK_ENCH,CHAOS,CLEANSLATE;
+    BASIC,DARK,CHAOTIC,CLEANSLATE;
 }

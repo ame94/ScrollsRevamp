@@ -8,6 +8,7 @@ package scrolls.event.scroll;
 
 import java.util.List;
 import java.util.Map;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
@@ -32,13 +33,12 @@ public class ScrollSpawnedEvent extends Event {
         this.natural = natural;
         ItemMeta meta = scroll.getItemMeta();
         List<String> lore = meta.getLore();
-        successProb = (double) Integer.parseInt(lore.get(1).substring(14, 16).replace(" ", "")) / 100;
+        successProb = (double) Integer.parseInt(ChatColor.stripColor(lore.get(1)).substring(14, 16).replace(" ", "")) / 100;
         destroyProb = 0.0;
-        if (lore.size() == 3 && lore.get(2).substring(0, 13).equalsIgnoreCase("Destroy Rate: ")) {
-            destroyProb = Integer.parseInt(lore.get(2).substring(14, 16).replace(" ", ""));
+        if (lore.size() > 2 && ChatColor.stripColor(lore.get(2)).substring(0, 15).equalsIgnoreCase("Destroy Chance:")){
+            destroyProb = (double) Integer.parseInt(ChatColor.stripColor(lore.get(2)).substring(16, 19).replace(" ", "")) / 100;
         }
     }
-
     public ScrollType getType() {
         return ScrollType.valueOf(scroll.getItemMeta().getLore().get(0).toUpperCase());
     }

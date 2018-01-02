@@ -8,11 +8,11 @@ package scrolls.inventory;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import scrolls.ScrollsPlugin;
 import scrolls.configuration.ScrollConfig;
 import scrolls.configuration.ScrollDataType;
 import scrolls.configuration.ScrollsConfig;
@@ -55,88 +55,87 @@ public class ScrollMath {
                 scroll = new ItemStack(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
                 meta = scroll.getItemMeta();
                 break;
-            case BASIC_ENCH:
+            case BASIC:
                 scrollConfig = basicConfig;
                 scroll = new ItemStack(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
                 meta = scroll.getItemMeta();
                 ench = getRandomEnchantment(config.getRareness_enchantments());
-                level = 0;
-                try{
-                level = (int) (Math.pow(
-                        Math.random(), 
-                        config.getRareness_enchlevel()) * 
-                        (ench.getMaxLevel() - 1)) + 1;
-                }catch(NullPointerException e ){
-                    e.printStackTrace();
-                }
+                level = level = (int) (Math.pow(
+                            Math.random(),
+                            config.getRareness_enchlevel())
+                            * (ench.getMaxLevel() - 1)) + 1;
                 meta.addEnchant(ench, level, true);
                 enchName = ench.getName().toLowerCase().replace("_", "");
                 romanLevel = integerToRoman(level);
-                lore.add(0,  ScrollType.BASIC_ENCH.toString().toLowerCase());
+                lore.add(0, ScrollType.BASIC.toString().toLowerCase());
                 break;
-            case DARK_ENCH:
+            case DARK:
                 scrollConfig = darkConfig;
                 scroll = new ItemStack(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
                 meta = scroll.getItemMeta();
                 ench = getRandomEnchantment(config.getRareness_enchantments());
-                level = 0;
-                try{
-                level = (int) (Math.pow(
-                        Math.random(), 
-                        config.getRareness_enchlevel()) * 
+                level = level = (int) (Math.pow(
+                        Math.random(),
+                        config.getRareness_enchlevel())*
                         (ench.getMaxLevel() - 1)) + 1;
-                }catch(NullPointerException e ){
-                    e.printStackTrace();
-                }
                 meta.addEnchant(ench, level, true);
                 enchName = ench.getName().toLowerCase().replace("_", "");
                 romanLevel = integerToRoman(level);
-                lore.add(0,  ScrollType.DARK_ENCH.toString().toLowerCase());
+                lore.add(0, ScrollType.DARK.toString().toLowerCase());
                 break;
-            case CHAOS:
+            case CHAOTIC:
                 scrollConfig = chaosConfig;
                 scroll = new ItemStack(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
                 meta = scroll.getItemMeta();
-                meta = Bukkit.getItemFactory().getItemMeta(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
-                lore.add(0,  ScrollType.CHAOS.toString().toLowerCase());
+                lore.add(0, ScrollType.CHAOTIC.toString().toLowerCase());
                 break;
             case CLEANSLATE:
                 scrollConfig = cleanConfig;
                 scroll = new ItemStack(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
                 meta = scroll.getItemMeta();
-                meta = Bukkit.getItemFactory().getItemMeta(scrollConfig.getAsMaterial(ScrollDataType.MATERIAL));
-                lore.add(0,  ScrollType.CLEANSLATE.toString().toLowerCase());
+                lore.add(0, ScrollType.CLEANSLATE.toString().toLowerCase());
                 break;
         }
+        
         int successProb = chance(scrollConfig.getAsDouble(ScrollDataType.SUCCESS_MAX),
                 scrollConfig.getAsDouble(ScrollDataType.SUCCESS_MIN),
                 scrollConfig.getAsInt(ScrollDataType.PROBABILITY_INCREMENT),
                 config.getRareness_successrate());
+        lore.add(1, String.format(ChatColor.GRAY + "Success Rate: %2s %%", successProb));
+        
         String scrollName = scrollConfig.getAsString(ScrollDataType.NAME)
                 .replace("%SUCCESS%", successProb + "")
                 .replace("%ENCH%", enchName)
                 .replace("%LVL%", romanLevel);
-        String description = scrollConfig.getAsString(ScrollDataType.DESCRIPTION)
+        String description = "    " +scrollConfig.getAsString(ScrollDataType.DESCRIPTION)
                 .replace("%SUCCESS%", successProb + "")
                 .replace("%ENCH%", enchName)
                 .replace("%LVL%", romanLevel);
-        lore.add(1,String.format("Success Rate: %2s %%",successProb));
+        
         if (scrollConfig.getAsDouble(ScrollDataType.DESTROY_MAX) != 0) {
-            int destroyProb = chance(scrollConfig.getAsDouble(ScrollDataType.DESTROY_MAX),
-                    scrollConfig.getAsDouble(ScrollDataType.DESTROY_MIN),
+            
+            int destroyProb = chance(scrollConfig.getAsDouble(ScrollDataType.DESTROY_MIN),
+                    scrollConfig.getAsDouble(ScrollDataType.DESTROY_MAX),
                     scrollConfig.getAsInt(ScrollDataType.PROBABILITY_INCREMENT),
-                    1-config.getRareness_destroyrate());
+                    config.getRareness_destroyrate());
+            lore.add(2, String.format(ChatColor.GRAY + "Destroy Chance: %2s %%", destroyProb));
+            
             scrollName = scrollName.replace("%DESTROY%", "" + destroyProb);
+            
             description = description.replace("%DESTROY%", "" + destroyProb);
-            description += "\n" + scrollConfig.getAsString(ScrollDataType.DESTROY_DESCRIPTION)
+            description += "-----    " + scrollConfig.getAsString(ScrollDataType.DESTROY_DESCRIPTION)
                     .replace("%SUCCESS%", successProb + "")
                     .replace("%ENCH%", enchName)
                     .replace("%LVL%", romanLevel)
                     .replace("%DESTROY%", destroyProb + "");
-            lore.add(2, String.format("Destroy Chance: %2s %%",destroyProb));
+            
         }
+        scrollName = ChatColor.translateAlternateColorCodes('&', scrollName);
+        description = ChatColor.translateAlternateColorCodes('&', description);
         meta.setDisplayName(scrollName);
-        lore.add(description);
+        for (String d : description.split("-----")) {
+            lore.add(d);
+        }
         meta.setLore(lore);
         scroll.setItemMeta(meta);
         return scroll;
@@ -155,11 +154,11 @@ public class ScrollMath {
         Enchantment[] enchs = config.getEnchantmentPriority();
         double f;
         if (e == 0) {
-            f = 1-Math.random();
+            f = 1 - Math.random();
         } else {
-            f = 1-Math.random()*Math.pow(Math.random(), e);
+            f = 1 - Math.random() * Math.pow(Math.random(), e);
         }
-        Enchantment ench = enchs[(int) Math.floor(f * (enchs.length-1))];
+        Enchantment ench = enchs[(int) Math.floor(f * (enchs.length - 1))];
         return ench;
     }
 

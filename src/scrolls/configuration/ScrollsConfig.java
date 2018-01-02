@@ -13,6 +13,7 @@ import scrolls.ScrollsPlugin;
  * @author knaxel
  */
 public class ScrollsConfig extends Config {
+    private boolean trackData;
     private boolean contrastEnchantmentAndRates; // better the enchant, lower the success rate / higher the destroy rate
     private double rareness_successrate; //curve determinant for success rates
     private double rareness_destroyrate; //curve determinant for success rates
@@ -77,6 +78,7 @@ public class ScrollsConfig extends Config {
 
     @Override
     public void loadToPlugin() {
+        trackData = config.getBoolean("track_scroll_data");
         contrastEnchantmentAndRates = config.getBoolean("rareness.contrast_enchantments_and_rates");
         rareness_successrate = config.getDouble("rareness.successrate");
         rareness_destroyrate = config.getDouble("rareness.destroyrate");
@@ -88,6 +90,14 @@ public class ScrollsConfig extends Config {
         for (int i = 0; i < list.size() - 1; i++) {
             enchantmentRarity[i] = Enchantment.getByName(list.get(i));
         }
+    }
+
+    public boolean isTrackData() {
+        return trackData;
+    }
+
+    public void setTrackData(boolean trackData) {
+        this.trackData = trackData;
     }
     public Enchantment[] getEnchantmentPriority(){
         return enchantmentRarity;
