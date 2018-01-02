@@ -35,7 +35,7 @@ public class EntityListener implements Listener{
     public void onDeath(EntityDeathEvent event){
         
         if(spawnConfig.isDropper(event.getEntityType())){
-            
+            System.out.println("test");
             double r = Math.random();
             if(r < spawnConfig.getChaosScrollRate()){
                 ItemStack scroll = plugin.getScrollMath().createRandomScroll(ScrollType.CHAOTIC);

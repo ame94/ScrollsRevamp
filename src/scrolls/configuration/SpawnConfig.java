@@ -28,10 +28,10 @@ public class SpawnConfig extends Config {
 
     @Override
     public void setDefaults() {
-        config.set("droprate.scroll", .05);
-        config.set("droprate.darkscroll", .03);
-        config.set("droprate.cleanslatescroll", .01);
-        config.set("droprate.chaosscroll", .005);
+        config.set("droprate.scroll", .15);
+        config.set("droprate.darkscroll", .10);
+        config.set("droprate.cleanslatescroll", .05);
+        config.set("droprate.chaosscroll", .025);
         scrollDroppers.add(0, EntityType.CAVE_SPIDER);
         scrollDroppers.add(1, EntityType.SPIDER);
         scrollDroppers.add(2, EntityType.ZOMBIE);
