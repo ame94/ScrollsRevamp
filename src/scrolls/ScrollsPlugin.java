@@ -44,6 +44,10 @@ public class ScrollsPlugin extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        
+        
+        
+        
         ScrollsPlugin.lg("Hello, thank you for trying the scrolls plugin!");
         
         ScrollsPlugin.lg("Loading configuration files...");

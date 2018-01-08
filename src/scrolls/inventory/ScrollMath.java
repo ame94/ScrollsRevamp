@@ -61,9 +61,9 @@ public class ScrollMath {
                 meta = scroll.getItemMeta();
                 ench = getRandomEnchantment(config.getRareness_enchantments());
                 level = level = (int) (Math.pow(
-                            Math.random(),
-                            config.getRareness_enchlevel())
-                            * (ench.getMaxLevel() - 1)) + 1;
+                        Math.random(),
+                        config.getRareness_enchlevel())
+                        * (ench.getMaxLevel() - 1)) + 1;
                 meta.addEnchant(ench, level, true);
                 enchName = ench.getName().toLowerCase().replace("_", "");
                 romanLevel = integerToRoman(level);
@@ -76,8 +76,8 @@ public class ScrollMath {
                 ench = getRandomEnchantment(config.getRareness_enchantments());
                 level = level = (int) (Math.pow(
                         Math.random(),
-                        config.getRareness_enchlevel())*
-                        (ench.getMaxLevel() - 1)) + 1;
+                        config.getRareness_enchlevel())
+                        * (ench.getMaxLevel() - 1)) + 1;
                 meta.addEnchant(ench, level, true);
                 enchName = ench.getName().toLowerCase().replace("_", "");
                 romanLevel = integerToRoman(level);
@@ -96,46 +96,64 @@ public class ScrollMath {
                 lore.add(0, ScrollType.CLEANSLATE.toString().toLowerCase());
                 break;
         }
-        
         int successProb = chance(scrollConfig.getAsDouble(ScrollDataType.SUCCESS_MAX),
                 scrollConfig.getAsDouble(ScrollDataType.SUCCESS_MIN),
                 scrollConfig.getAsInt(ScrollDataType.PROBABILITY_INCREMENT),
                 config.getRareness_successrate());
         lore.add(1, String.format(ChatColor.GRAY + "Success Rate: %2s %%", successProb));
-        
         String scrollName = scrollConfig.getAsString(ScrollDataType.NAME)
                 .replace("%SUCCESS%", successProb + "")
                 .replace("%ENCH%", enchName)
                 .replace("%LVL%", romanLevel);
-        String description = "    " +scrollConfig.getAsString(ScrollDataType.DESCRIPTION)
+        String description = "    " + scrollConfig.getAsString(ScrollDataType.DESCRIPTION)
                 .replace("%SUCCESS%", successProb + "")
                 .replace("%ENCH%", enchName)
                 .replace("%LVL%", romanLevel);
-        
+        String destroyDescription="";
         if (scrollConfig.getAsDouble(ScrollDataType.DESTROY_MAX) != 0) {
-            
             int destroyProb = chance(scrollConfig.getAsDouble(ScrollDataType.DESTROY_MIN),
                     scrollConfig.getAsDouble(ScrollDataType.DESTROY_MAX),
                     scrollConfig.getAsInt(ScrollDataType.PROBABILITY_INCREMENT),
                     config.getRareness_destroyrate());
             lore.add(2, String.format(ChatColor.GRAY + "Destroy Chance: %2s %%", destroyProb));
-            
             scrollName = scrollName.replace("%DESTROY%", "" + destroyProb);
-            
-            description = description.replace("%DESTROY%", "" + destroyProb);
-            description += "-----    " + scrollConfig.getAsString(ScrollDataType.DESTROY_DESCRIPTION)
+            destroyDescription = destroyDescription.replace("%DESTROY%", "" + destroyProb);
+            destroyDescription += "    " + scrollConfig.getAsString(ScrollDataType.DESTROY_DESCRIPTION)
                     .replace("%SUCCESS%", successProb + "")
                     .replace("%ENCH%", enchName)
                     .replace("%LVL%", romanLevel)
                     .replace("%DESTROY%", destroyProb + "");
-            
+        }
+        ChatColor descriptionColor = ChatColor.RESET; 
+        if(description.contains("&")){
+            descriptionColor = ChatColor.getByChar(description.charAt(description.indexOf("&")+1));
+            description = ChatColor.translateAlternateColorCodes('&', description);
+        }
+        ChatColor destroyDescriptionColor = ChatColor.RESET; 
+        if(destroyDescription.contains("&")){
+            destroyDescriptionColor = ChatColor.getByChar(destroyDescription.charAt(destroyDescription.indexOf("&")+1));
+            destroyDescription = ChatColor.translateAlternateColorCodes('&', destroyDescription);
         }
         scrollName = ChatColor.translateAlternateColorCodes('&', scrollName);
-        description = ChatColor.translateAlternateColorCodes('&', description);
         meta.setDisplayName(scrollName);
-        for (String d : description.split("-----")) {
-            lore.add(d);
-        }
+            int ll = 32;
+            for (int i = 0; i < description.length() / ll; i++) {
+                if (description.length() >= i * ll + ll) {
+                    
+                    lore.add(descriptionColor + description.substring(i * ll, i * ll + ll));
+                } else {
+                    lore.add(descriptionColor + description.substring(i * ll));
+                }
+            }
+            for (int i = 0; i < destroyDescription.length() / ll; i++) {
+                if (destroyDescription.length() >= i * ll + ll) {
+                    
+                    lore.add(destroyDescriptionColor + destroyDescription.substring(i * ll, i * ll + ll));
+                } else {
+                    lore.add(destroyDescriptionColor + destroyDescription.substring(i * ll));
+                }
+            }
+            //lore.add(d);
         meta.setLore(lore);
         scroll.setItemMeta(meta);
         return scroll;

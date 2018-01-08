@@ -8,6 +8,7 @@ package scrolls.event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -65,6 +66,7 @@ public class InventoryListener implements Listener {
     @EventHandler
     public void onInvClick(InventoryClickEvent event) {
         Player player = (Player) event.getWhoClicked();
+        
         if ((event.getAction() != InventoryAction.PLACE_ALL && event.getAction() != InventoryAction.SWAP_WITH_CURSOR) || event.getCursor().getType() == Material.AIR || event.getCurrentItem().getType() == Material.AIR) {
             return;
         }
