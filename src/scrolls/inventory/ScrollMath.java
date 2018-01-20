@@ -136,29 +136,30 @@ public class ScrollMath {
         }
         scrollName = ChatColor.translateAlternateColorCodes('&', scrollName);
         meta.setDisplayName(scrollName);
-            int ll = 32;
-            for (int i = 0; i < description.length() / ll; i++) {
-                if (description.length() >= i * ll + ll) {
-                    
-                    lore.add(descriptionColor + description.substring(i * ll, i * ll + ll));
-                } else {
-                    lore.add(descriptionColor + description.substring(i * ll));
-                }
-            }
-            for (int i = 0; i < destroyDescription.length() / ll; i++) {
-                if (destroyDescription.length() >= i * ll + ll) {
-                    
-                    lore.add(destroyDescriptionColor + destroyDescription.substring(i * ll, i * ll + ll));
-                } else {
-                    lore.add(destroyDescriptionColor + destroyDescription.substring(i * ll));
-                }
-            }
-            //lore.add(d);
+        lore.addAll(getListParagraph(description, 24));
         meta.setLore(lore);
         scroll.setItemMeta(meta);
         return scroll;
     }
 
+    private List<String> getListParagraph(String source, int width) {
+        List<String> paragraph = new ArrayList<String>();
+        StringBuilder line = new StringBuilder();
+        int curWidth = 0;
+
+        for (char c: source.toCharArray()) {
+            if (curWidth > width && c == ' ') {
+                paragraph.add(line.toString());
+                line = new StringBuilder();
+                curWidth = 0;
+                continue;
+            }
+            line.append(c);
+            ++curWidth;
+        }
+
+        return paragraph;
+    }
     private int chance(double max, double min, int increment, double e) {
         max = max / 100;
         min = min / 100;
