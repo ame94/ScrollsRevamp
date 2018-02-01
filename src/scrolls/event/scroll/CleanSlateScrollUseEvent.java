@@ -30,12 +30,13 @@ public class CleanSlateScrollUseEvent extends ScrollUseEvent{
     public void apply(){
         
         ItemMeta appMeta = appItem.getItemMeta();
-        String string = appMeta.getLore().get(0);
-        int slots = Integer.parseInt(string.substring(15, 17).replaceAll(" ", ""));
-        
-        appMeta.getLore().set(0, String.format(string.replaceFirst(string.substring(15, 17), "%2s"),slots++));
-        appItem.setItemMeta(appMeta);
-               
+        if (appMeta.getLore().size() > 0) {
+            String string = appMeta.getLore().get(0);
+            int slots = Integer.parseInt(string.substring(15, 17).replaceAll(" ", ""));
+
+            appMeta.getLore().set(0, String.format(string.replaceFirst(string.substring(15, 17), "%2s"),slots++));
+            appItem.setItemMeta(appMeta);
+        }
     }
     public HandlerList getHandlers() {
         return HANDLERS;
@@ -44,7 +45,4 @@ public class CleanSlateScrollUseEvent extends ScrollUseEvent{
     public static HandlerList getHandlerList() {
         return HANDLERS;
     }
-
-    
-    
 }

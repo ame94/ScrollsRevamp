@@ -8,13 +8,18 @@ package scrolls.event.scroll;
 
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import scrolls.ScrollsPlugin;
 import scrolls.inventory.ScrollType;
+
 
 /**
  *
@@ -41,8 +46,17 @@ public abstract class ScrollUseEvent extends Event {
         ItemMeta meta = scroll.getItemMeta();
         List<String> lore = meta.getLore();
         ItemMeta appMeta = appItem.getItemMeta();
-        successProb = (double) Integer.parseInt(lore.get(1).substring(14, 16).replace(" ", "")) / 100;
-        
+
+        Pattern pattern_successRate = Pattern.compile("Success Rate: (\\d+)");
+        Matcher m = pattern_successRate.matcher(lore.get(1));
+
+        if (m.find()) {
+            successProb = (double)Integer.parseInt(m.group(1)) / 100.0;
+            //ScrollsPlugin.lg("Using " + successProb);
+        } else {
+            successProb = 90.0;
+        }
+
         if (Math.random() < successProb) {
             success = true;
             destroyed = false;
